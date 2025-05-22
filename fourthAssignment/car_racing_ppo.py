@@ -16,20 +16,20 @@ def make_env(headless):
 
 def main():
     headless = True
+    stats_path = "models/vecnormalize.pkl"
 
-    venv = DummyVecEnv([lambda: make_env(headless)])
-    venv = VecTransposeImage(venv)
-    venv = VecFrameStack(venv, n_stack=4)
-    venv = VecNormalize(
-        venv,
-        norm_obs=True,
-        norm_reward=False,
-        clip_obs=10.0,
-    )
+    base_env = DummyVecEnv([lambda: make_env(headless)])
+    env = VecTransposeImage(base_env)
+    env = VecFrameStack(env, n_stack=4)
+    if os.path.exists(stats_path):
+        env = VecNormalize.load(stats_path, env)
+        env.training = not headless
+    else:
+        env = VecNormalize(env, norm_obs=True, norm_reward=False, clip_obs=10.0)
 
     model = PPO(
         "CnnPolicy",
-        venv,
+        env,
         verbose=1,
         n_steps=256,
         batch_size=64,
@@ -42,24 +42,24 @@ def main():
     )
 
     model.learn(total_timesteps=1_000)
-
     os.makedirs("models", exist_ok=True)
     model.save("models/ppo_car_racing")
+    env.save(stats_path)
 
     if not headless:
         for ep in range(3):
-            obs = venv.reset()
+            obs = env.reset()
             done = False
             total_reward = 0.0
             while not done:
                 action, _ = model.predict(obs, deterministic=True)
-                obs, reward, terminated, truncated = venv.step(action)
+                obs, reward, terminated, truncated = env.step(action)
                 done = terminated or truncated
                 total_reward += reward
-                venv.render()
+                env.render()
             print(f"Episode {ep + 1} reward: {total_reward}")
 
-    venv.close()
+    env.close()
 
 
 if __name__ == "__main__":
