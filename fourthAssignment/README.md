@@ -20,7 +20,7 @@ TD3—across two discrete-action and one continuous-action environments on a mac
 
 Hardware & software
 
-* MacBook Pro M2, 16 GB RAM, macOS 14
+* MacBook Pro M4, 16 GB RAM, macOS 15
 * Python 3.12, PyTorch 2.3, SB3 2.4.0
 * Gymnasium 1.5.0, MuJoCo 2.3.8 (`MUJOCO_GL=metal`)
 
