@@ -28,8 +28,9 @@ def visualize(algo, model_path, stats_path, headless):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--algo", choices=["ppo", "sac"], default="sac")
-    parser.add_argument("--model", default="models/ppo_car_racing.zip")
+    parser.add_argument("--algo", choices=["ppo", "sac"], default="ppo")
+    parser.add_argument("--model", choices=["models/ppo_car_racing.zip", "models/sac_car_racing.zip"],
+                        default="models/ppo_car_racing.zip")
     parser.add_argument("--stats", default="models/vecnormalize.pkl")
     parser.add_argument("--headless", action="store_true")
     args = parser.parse_args()
