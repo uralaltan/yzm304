@@ -1,6 +1,6 @@
 import os
 import gymnasium as gym
-from stable_baselines3 import PPO
+from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import (
     DummyVecEnv,
     VecTransposeImage,
@@ -27,24 +27,29 @@ def main():
         clip_obs=10.0,
     )
 
-    model = PPO(
+    model = SAC(
         "CnnPolicy",
         venv,
         verbose=1,
-        n_steps=256,
-        batch_size=64,
-        n_epochs=4,
-        learning_rate=2.5e-4,
+        buffer_size=10_000,
+        optimize_memory_usage=True,
+        replay_buffer_kwargs={
+            "handle_timeout_termination": False
+        },
+        train_freq=(1, "step"),
+        gradient_steps=1,
+        learning_rate=3e-4,
+        batch_size=256,
+        tau=0.005,
+        ent_coef="auto",
         gamma=0.99,
-        gae_lambda=0.95,
-        clip_range=0.1,
         policy_kwargs={"normalize_images": False},
     )
 
     model.learn(total_timesteps=1_000)
 
     os.makedirs("models", exist_ok=True)
-    model.save("models/ppo_car_racing")
+    model.save("models/sac_car_racing")
 
     if not headless:
         for ep in range(3):
