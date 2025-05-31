@@ -1,7 +1,7 @@
 import gymnasium as gym
 import argparse
 import os
-from stable_baselines3 import PPO, SAC
+from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack, VecNormalize
 
 
@@ -16,7 +16,14 @@ def visualize(algo, model_path, stats_path, headless):
     venv = VecFrameStack(venv, n_stack=4)
     venv = VecNormalize.load(stats_path, venv)
     venv.training = False
-    Model = PPO if algo.lower() == "ppo" else SAC
+    if algo.lower() == "ppo":
+        Model = PPO
+    elif algo.lower() == "sac":
+        Model = SAC
+    elif algo.lower() == "td3":
+        Model = TD3
+    else:
+        raise ValueError(f"Unsupported algorithm: {algo}")
     model = Model.load(model_path, env=venv)
     obs = venv.reset()
     while True:
@@ -31,8 +38,8 @@ if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--algo", choices=["ppo", "sac"], default="ppo")
-    parser.add_argument("--model", choices=["models/ppo_car_racing.zip", "models/sac_car_racing.zip"],
+    parser.add_argument("--algo", choices=["ppo", "sac", "td3"], default="ppo")
+    parser.add_argument("--model", choices=["models/ppo_car_racing.zip", "models/sac_car_racing.zip", "models/td3_car_racing.zip"],
                         default="models/ppo_car_racing.zip")
     parser.add_argument("--stats", default="models/vecnormalize.pkl")
     parser.add_argument("--headless", action="store_true")
