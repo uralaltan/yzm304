@@ -1,5 +1,6 @@
 import gymnasium as gym
 import argparse
+import os
 from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack, VecNormalize
 
@@ -27,6 +28,8 @@ def visualize(algo, model_path, stats_path, headless):
 
 
 if __name__ == "__main__":
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--algo", choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--model", choices=["models/ppo_car_racing.zip", "models/sac_car_racing.zip"],
@@ -34,4 +37,8 @@ if __name__ == "__main__":
     parser.add_argument("--stats", default="models/vecnormalize.pkl")
     parser.add_argument("--headless", action="store_true")
     args = parser.parse_args()
-    visualize(args.algo, args.model, args.stats, args.headless)
+    
+    model_path = os.path.join(script_dir, args.model) if not os.path.isabs(args.model) else args.model
+    stats_path = os.path.join(script_dir, args.stats) if not os.path.isabs(args.stats) else args.stats
+    
+    visualize(args.algo, model_path, stats_path, args.headless)
