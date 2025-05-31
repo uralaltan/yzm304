@@ -1,6 +1,6 @@
 import numpy as np
 import gymnasium as gym
-from stable_baselines3 import PPO, SAC
+from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack, VecNormalize
 
 
@@ -39,14 +39,30 @@ def main():
     stats_path = "models/vecnormalize.pkl"
     ppo_path = "models/ppo_car_racing.zip"
     sac_path = "models/sac_car_racing.zip"
+    td3_path = "models/td3_car_racing.zip"
 
     ppo_rewards = evaluate(PPO, ppo_path, stats_path)
     sac_rewards = evaluate(SAC, sac_path, stats_path)
+    td3_rewards = evaluate(TD3, td3_path, stats_path)
 
     print(f"PPO    -> mean: {ppo_rewards.mean():.2f}, std: {ppo_rewards.std():.2f}")
     print(f"SAC    -> mean: {sac_rewards.mean():.2f}, std: {sac_rewards.std():.2f}")
-    diff = sac_rewards.mean() - ppo_rewards.mean()
-    print(f"Diff   -> SAC_mean - PPO_mean = {diff:.2f}")
+    print(f"TD3    -> mean: {td3_rewards.mean():.2f}, std: {td3_rewards.std():.2f}")
+    
+    print("\nComparisons:")
+    sac_ppo_diff = sac_rewards.mean() - ppo_rewards.mean()
+    td3_ppo_diff = td3_rewards.mean() - ppo_rewards.mean()
+    td3_sac_diff = td3_rewards.mean() - sac_rewards.mean()
+    
+    print(f"SAC_mean - PPO_mean = {sac_ppo_diff:.2f}")
+    print(f"TD3_mean - PPO_mean = {td3_ppo_diff:.2f}")
+    print(f"TD3_mean - SAC_mean = {td3_sac_diff:.2f}")
+    
+    # Find best performing algorithm
+    algorithms = ["PPO", "SAC", "TD3"]
+    means = [ppo_rewards.mean(), sac_rewards.mean(), td3_rewards.mean()]
+    best_idx = np.argmax(means)
+    print(f"\nBest performing algorithm: {algorithms[best_idx]} with mean reward: {means[best_idx]:.2f}")
 
 
 if __name__ == "__main__":
